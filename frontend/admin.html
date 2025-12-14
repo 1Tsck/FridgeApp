@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 style="text-align:left; color:#2193b0; margin-bottom:1.5rem;">Admin – Item Types</h2>
+
+<div class="table-container">
+    <table id="typeTable" class="styled-table">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Name</th>
+                <th onclick="sortTable(1)">Description</th>
+                <th>Modify Name</th>
+                <th>Modify Description</th>
+                <th style="text-align: center;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in types %}
+            <tr>
+                <td>{{ t.name }}</td>
+                <td>{{ t.description }}</td>
+                <form method="post" action="/admin/item-type/update" class="inline-form">
+                    <input type="hidden" name="item_type_id" value="{{ t.id }}">
+                    <td><input name="name" value="{{ t.name }}" class="input-field"></td>
+                    <td><input name="description" value="{{ t.description }}" class="input-field"></td>
+                    <td class="actions">
+                        <button type="submit" class="action-button update-button">Save</button>
+                </form>
+                <form action="/admin/item-type/delete" method="post" class="delete-form inline-form">
+                    <input type="hidden" name="item_type_id" value="{{ t.id }}">
+                    <button type="submit" class="action-button delete-button">Delete</button>
+                </form>
+                    </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<h3 style="margin-top:2rem; color:#2193b0;">Add new type</h3>
+<form method="post" id="addItemForm" action="/admin/item-type/create" class="add-form">
+    <input type="text" id="add_item_name" name="add_item_name" placeholder="Name" required class="input-field small-input">
+    <input type="text" id="add_item_desc" name="add_item_desc" placeholder="Description" required class="input-field small-input">
+    <button type="submit" class="action-button update-button">Add</button>
+</form>
+<!-- delete script-->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const forms = document.querySelectorAll(".delete-form");
+
+    forms.forEach(form => {
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            Swal.fire({
+                title: "Delete item type?",
+                text: "This action cannot be undone.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#e74c3c",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it",
+                cancelButtonText: "Cancel"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+});
+</script>
+<!-- sortable table -->
+ <script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Automatically sort the table by column 0 (first column)
+    // Set `numeric = true` if sorting numbers
+    sortTable(0, false);
+});
+</script>
+<script>
+function sortTable(columnIndex, numeric = false) {
+    const table = document.getElementById("typeTable");
+    const tbody = table.tBodies[0];
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+    const headers = table.querySelectorAll("th");
+
+    // Toggle sort direction
+    const currentSort = table.dataset.sortColumn == columnIndex;
+    const ascending = !currentSort || table.dataset.sortDirection === "desc";
+
+    // Sort rows
+    rows.sort((a, b) => {
+        let valA = a.children[columnIndex].innerText.trim();
+        let valB = b.children[columnIndex].innerText.trim();
+
+        if (numeric) {
+            valA = parseFloat(valA) || 0;
+            valB = parseFloat(valB) || 0;
+        }
+
+        if (valA < valB) return ascending ? -1 : 1;
+        if (valA > valB) return ascending ? 1 : -1;
+        return 0;
+    });
+
+    // Rebuild table body
+    tbody.innerHTML = "";
+    rows.forEach(row => tbody.appendChild(row));
+
+    // Update sort metadata
+    table.dataset.sortColumn = columnIndex;
+    table.dataset.sortDirection = ascending ? "asc" : "desc";
+
+    // Clear previous active sort indicators
+    headers.forEach((th, i) => {
+        th.removeAttribute("data-sorted");
+        if (i === columnIndex) {
+            th.setAttribute("data-sorted", ascending ? "asc" : "desc");
+        }
+    });
+}
+</script>
+{% endblock %}

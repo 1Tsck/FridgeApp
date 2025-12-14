@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 style="text-align:left; color:#2193b0; margin-bottom:1.5rem;">Fridge Contents</h2>
+
+<div class="table-container">
+    <table id="fridgeTable" class="styled-table">
+        <thead>
+            <tr>
+                <th>Photo</th>
+                <th onclick="sortTable(0)">Item</th>
+                <th onclick="sortTable(1, true)">Quantity</th>
+                <th onclick="sortTable(2)">Unit</th>
+                <th>Expiry Date</th>
+                <th>Modify Item</th>
+                <th style="text-align: center;" colspan="2">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+          <tr>
+    <!-- Photo -->
+    <td>
+      {% if item.photo_url %}
+          <img src="{{ item.photo_url }}" alt="{{ item.name }}" style="width:80px; border-radius:5px;">
+      {% endif %}
+    </td>
+  
+    <!-- Item name -->
+    <td>{{ typesDict.get(item.type_id).name }}</td>
+  
+    <!-- Quantity -->
+    <td style="text-align:right;">{{ item.quantity }}</td>
+  
+    <!-- Unit -->
+    <td><div class="cell-center">{{ item.unit }}</div></td>
+
+    <td><div class="cell-center">{{ item.expiry_date }}</div></td>
+
+    <!-- Modify form in ONE place -->
+    <td>
+      <form method="post" action="/fridge/item/update" enctype="multipart/form-data" class="inline-form">
+  
+          <input type="hidden" name="type_name" value="{{ typesDict.get(item.type_id).name }}">
+          <input type="hidden" name="item_id" value="{{ item.id }}">
+
+          <div class="cell-center">
+          <!-- inline fields -->
+          <input type="number" name="quantity" value="{{ item.quantity }}" class="input-field smallest-input" style="width:70px;">
+          <input name="unit" value="{{ item.unit }}" class="input-field" style="width:70px;">
+          <input type="date" name="expiry_date" class="input-field small-input" value="{{ item.expiry_date }}">
+  
+          <input type="file" name="photo" id="photo-{{ item.id }}" class="file-upload">
+          <label for="photo-{{ item.id }}" class="file-label">Choose Photo</label>
+          </div>
+
+        </td>
+
+
+
+        <td>
+            <div class="cell-col-center">
+          <button type="submit" class="action-button update-button">Save</button>
+      </form>
+    <!-- Delete -->
+     
+      <form action="/fridge/item/delete" method="post" class="delete-form inline-form">
+          <input type="hidden" name="type_name" value="{{ typesDict.get(item.type_id).name }}">
+          <input type="hidden" name="item_id" value="{{ item.id }}">
+          <button type="submit" class="action-button delete-button">Delete</button>
+      </form>  
+    <!-- Add to cart -->
+          <button type="button" class="action-button add-to-cart" onclick="openUpdateModal('{{ item.type_id }}', '{{ typesDict.get(item.type_id).name }}')">Add to cart</button>
+      </div>
+        </td>
+
+
+    </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h3 style="margin-top:2rem; color:#2193b0;">Add new item</h3>
+<form method="post" id="addItemForm" action="/fridge/item/create" class="add-form" enctype="multipart/form-data">
+    <select id="add_item_item_type_id" name="add_item_item_type_id" required class="add-item-form-select small-input">
+        <option value="">-- Select item type --</option>
+        {% for type in types %}
+        <option value="{{ type.id }}">{{ type.name }} ({{ type.description }})</option>
+        {% endfor %}
+    </select>
+    <input type="number" id="add_item_quantity" name="add_item_quantity" placeholder="Quantity" required class="input-field smaller-input">
+    <input type="text" id="add_item_unit" name="add_item_unit" placeholder="Unit" required class="input-field small-input">
+    <input type="date" name="add_expiry_date" class="input-field small-input">
+    <input type="file" name="add_photo" id="add_photo" class="file-upload">
+    <label for="add_photo" class="file-label">Choose Photo</label>
+    <button type="submit" class="action-button update-button">Add</button>
+</form>
+
+<!-- SweetAlert2 Add-to-Cart Script -->
+<script>
+function openUpdateModal(itemTypeId, itemTypeName) {
+    Swal.fire({
+        title: 'Add to cart: ' + itemTypeName,
+        html: `
+            <input type="hidden" id="swal-item-type-id" value="${itemTypeId}">
+            <div style="display: flex; flex-direction: row; gap: 15px;">
+                <input type="number" id="swal-quantity" class="input-field small-input" placeholder="Enter quantity" required>
+                <input type="text" id="swal-unit" class="input-field small-input" placeholder="Enter unit" required>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Add',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        preConfirm: () => {
+            const quantity = document.getElementById('swal-quantity').value;
+            const unit = document.getElementById('swal-unit').value;
+            if (!quantity || !unit) {
+                Swal.showValidationMessage('Please enter both quantity and unit');
+                return false;
+            }
+            return { item_type_id: itemTypeId, quantity, unit };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+
+            fetch('/fridge/item/addtocart', {
+                method: 'POST',
+                headers: {
+                          'Content-Type': 'application/x-www-form-urlencoded',
+                          'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams(result.value)
+            })
+            .then(async response => {
+                if (response.status === 401) {
+                    // User not authorized → show login message
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Not Authorized',
+                        text: 'Please log in to add items to the cart.',
+                        confirmButtonText: 'Go to login',
+                        confirmButtonColor: '#3085d6'
+                    }).then(() => {
+                        window.location.href = '/login';
+                    });
+                } else if (response.ok) {
+                    // Successful response
+                    Swal.fire('Done', 'Item added to cart!', 'success');
+                } else {
+                    // Backend error (e.g. 400, 500)
+                    const msg = await response.text();
+                    Swal.fire('Error', msg || 'Failed to add item to cart', 'error');
+                }
+            })
+            .catch(error => Swal.fire('Error', 'Request failed: ' + error, 'error'));
+        }
+    });
+}
+</script>
+
+<!-- SweetAlert2 Delete Confirmation -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".delete-form").forEach(form => {
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+            Swal.fire({
+                title: "Delete this item?",
+                text: "This action cannot be undone.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it",
+                cancelButtonText: "Cancel"
+            }).then((result) => {
+                if (result.isConfirmed) form.submit();
+            });
+        });
+    });
+});
+</script>
+<!-- sortable table -->
+ <script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Automatically sort the table by column 0 (first column)
+    // Set `numeric = true` if sorting numbers
+    sortTable(0, false);
+});
+</script>
+<script>
+function sortTable(columnIndex, numeric = false) {
+    const table = document.getElementById("fridgeTable");
+    const tbody = table.tBodies[0];
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+    const headers = table.querySelectorAll("th");
+
+    // Toggle sort direction
+    const currentSort = table.dataset.sortColumn == columnIndex;
+    const ascending = !currentSort || table.dataset.sortDirection === "desc";
+
+    // Sort rows
+    rows.sort((a, b) => {
+        let valA = a.children[columnIndex].innerText.trim();
+        let valB = b.children[columnIndex].innerText.trim();
+
+        if (numeric) {
+            valA = parseFloat(valA) || 0;
+            valB = parseFloat(valB) || 0;
+        }
+
+        if (valA < valB) return ascending ? -1 : 1;
+        if (valA > valB) return ascending ? 1 : -1;
+        return 0;
+    });
+
+    // Rebuild table body
+    tbody.innerHTML = "";
+    rows.forEach(row => tbody.appendChild(row));
+
+    // Update sort metadata
+    table.dataset.sortColumn = columnIndex;
+    table.dataset.sortDirection = ascending ? "asc" : "desc";
+
+    // Clear previous active sort indicators
+    headers.forEach((th, i) => {
+        th.removeAttribute("data-sorted");
+        if (i === columnIndex) {
+            th.setAttribute("data-sorted", ascending ? "asc" : "desc");
+        }
+    });
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("input[type='file']").forEach(function (fileInput) {
+
+        fileInput.addEventListener("change", function () {
+            const label = document.querySelector(`label[for='${fileInput.id}']`);
+            
+            if (fileInput.files.length > 0) {
+                label.classList.add("selected");   // highlight
+            } else {
+                label.classList.remove("selected");
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

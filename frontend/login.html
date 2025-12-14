@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+
+    <!-- Firebase (Compat Versions) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+
+    <!-- Basic Styling -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .login-container {
+            background: #fff;
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #2193b0;
+            outline: none;
+        }
+
+        button {
+            background: #2193b0;
+            color: #fff;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #1a7b90;
+        }
+
+        .error {
+            color: #d9534f;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #777;
+        }
+    </style>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+                apiKey: "AIzaSyAYOWQcMqpHcufLecTfHfBgx4NKqVUs9f4",
+                authDomain: "fridgeapp-5c204.firebaseapp.com",
+                projectId: "fridgeapp-5c204",
+                storageBucket: "fridgeapp-5c204.firebasestorage.app",
+                messagingSenderId: "113622626587",
+                appId: "1:113622626587:web:c86f37be8b2ae700a7a3be"
+          };
+        firebase.initializeApp(firebaseConfig);
+
+        async function login() {
+            // read the credentials from the form, set up an empty error message
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('error-msg');
+            errorMsg.textContent = '';
+
+            // send them to Firebase for authentication, receive the account details and save at empty directory
+            // redirect user to home or their previous site
+            try {
+                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                const token = await userCredential.user.getIdToken();
+                document.cookie = `token=${token};path=/`;
+                const params = new URLSearchParams(window.location.search);
+                const next = params.get("next") || "/fridge";
+                window.location = next;
+            // if login fails, receive the error message
+            } catch (err) {
+                errorMsg.textContent = 'Login failed: ' + err.message;
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="login-container">
+        <h2>Welcome Back 👋</h2>
+        <form onsubmit="login(); return false;">
+            <input id="email" type="email" placeholder="Email" autocomplete="username" required>
+            <input id="password" type="password" placeholder="Password" autocomplete="current-password" required>
+            <button type="submit">Login</button>
+        </form>
+        <div id="error-msg" class="error"></div>
+        <div class="footer">
+            <p>Powered by Firebase Authentication</p>
+        </div>
+    </div>
+</body>
+</html>

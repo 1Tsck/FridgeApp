@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3 style="margin-top:2rem; color:#2193b0;">Set timeframe (default 30 days)</h3>
+<form method="get" action="/stats" class="filter-form">
+    <label>From:</label>
+    <input type="date" name="start" id="start" value="{{ default_start }}" class="input-field smaller-input">
+
+    <label>To:</label>
+    <input type="date" name="end" id="end" value="{{ default_end }}" class="input-field smaller-input">
+
+    <button type="submit" class="action-button apply-button">Apply</button>
+    <button type="button" onclick="document.querySelector('#start').value=''; document.querySelector('#end').value=''; this.form.submit();" class="action-button delete-button">Clear</button>
+</form>
+
+
+<h2 style="text-align:left; color:#2193b0; margin-bottom:1.5rem;">Operation Statistics</h2>
+<div class="table-container">
+  <table id="statsTable" class="styled-table">
+    <thead>
+      <tr>
+        <th onclick="sortTable('statsTable',0, false)">Item</th>
+        <th onclick="sortTable('statsTable',1, true)">Additions</th>
+        <th onclick="sortTable('statsTable',2, true)">Deletions</th>
+        <th onclick="sortTable('statsTable',3, true)">Modifications</th>
+        <th>Most Active User</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in stats %}
+      <tr>
+        <td>{{ row.item }}</td>
+        <td style="text-align:right;">{{ row.add_count }}</td>
+        <td style="text-align:right;">{{ row.delete_count }}</td>
+        <td style="text-align:right;">{{ row.modify_count }}</td>
+        <td>{{ row.top_user }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<h2 style="text-align:left; color:#2193b0; margin-bottom:1.5rem;">Change Log</h2>
+<div class="table-container">
+    <table id="changeLogTable" class="styled-table" data-sort-direction="desc">
+        <thead>
+            <tr>
+                <th onclick="sortTable('changeLogTable', 0, false)">Date</th>
+                <th onclick="sortTable('changeLogTable',1, false)">User</th>
+                <th onclick="sortTable('changeLogTable',2, false)">Item</th>
+                <th onclick="sortTable('changeLogTable',3, false)">Action Type</th>
+                <th>Before</th>
+                <th>After</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in change_log %}
+            <tr>
+                <td>{{ c.time.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ c.user }}</td>
+                <td>{{ c.item }}</td>
+                <td>{{ c.op_type }}</td>
+                <td>{{ c.old_value }}</td>
+                <td>{{ c.new_value }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- sortable table -->
+ <script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Automatically sort the table by column 0 (first column)
+    // Set `numeric = true` if sorting numbers
+    sortTable('changeLogTable', 0, false);
+    sortTable('changeLogTable',0, false);
+    sortTable('statsTable',3, true)
+    sortTable('statsTable',3, true)
+});
+</script>
+<script>
+function sortTable(tableId, columnIndex, numeric = false) {
+    const table = document.getElementById(tableId);
+    const tbody = table.tBodies[0];
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+    const headers = table.querySelectorAll("th");
+
+    // Toggle sort direction
+    const currentSort = table.dataset.sortColumn == columnIndex;
+    const ascending = !currentSort || table.dataset.sortDirection === "desc";
+
+    // Sort rows
+    rows.sort((a, b) => {
+        // Set the values to compare to the values of datacells of the column of chosen index
+        let valA = a.children[columnIndex].innerText.trim();
+        let valB = b.children[columnIndex].innerText.trim();
+
+        // if the values are numeric parse them to float from string
+        if (numeric) {
+            valA = parseFloat(valA) || 0;
+            valB = parseFloat(valB) || 0;
+        }
+
+        // check all possible conditions
+        if (valA < valB) return ascending ? -1 : 1;
+        if (valA > valB) return ascending ? 1 : -1;
+        return 0;
+    });
+
+    // Rebuild table body
+    tbody.innerHTML = "";
+    rows.forEach(row => tbody.appendChild(row));
+
+    // Update sort metadata
+    table.dataset.sortColumn = columnIndex;
+    table.dataset.sortDirection = ascending ? "asc" : "desc";
+
+    // Clear previous active sort indicators
+    headers.forEach((th, i) => {
+        th.removeAttribute("data-sorted");
+        if (i === columnIndex) {
+            th.setAttribute("data-sorted", ascending ? "asc" : "desc");
+        }
+    });
+}
+</script>
+{% endblock %}

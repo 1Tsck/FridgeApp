@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+    
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fridge Manager</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary-color: #2193b0;
+            --secondary-color: #6dd5ed;
+            --bg-color: #f7f9fb;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        nav a::after {
+            content: '';
+            display: block;
+            height: 2px;
+            background: white;
+            transition: width 0.3s;
+            width: 0;
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .message {
+            background: #e8f4fd;
+            border-left: 5px solid var(--primary-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+        }
+
+        form.search-form {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+
+        form.search-form input {
+            padding: 0.6rem 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        form.search-form button {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        form.search-form button:hover {
+            background-color: #19788f;
+        }
+
+        footer {
+            text-align: center;
+            margin: 2rem 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+{% set user = get_user(request) %}
+<body>
+    <header>
+        <h1>Fridge Manager</h1>
+        <nav>
+            <a href="/fridge">Home</a>
+            {% if user and (user.admin or user.is_admin) %}
+            <a href="/admin">Admin</a>
+            {% endif %}
+            <a href="/cart">Shopping Cart</a>
+            <a href="/stats">Statistics</a>
+            <a href="/login">Login</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    </header>
+
+    <main>
+        {% if msg %}
+        <div class="message">{{ msg }}</div>
+        {% endif %}
+
+        <form class="search-form" method="get" action="{{ request.url.path }}">
+            <input id="filter" name="filter" value="{{ filter }}" placeholder="Search by name..."/>
+            <button type="submit">Search</button>
+            <button type="button" onclick="document.querySelector('#filter').value=''; this.form.submit();">Clear</button>
+        </form>
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        &copy; {{ now().year if now else '2025' }} Fridge Manager — Keep it fresh 🧊
+    </footer>
+</body>
+<style>
+.cell-col-center {
+    display: flex;
+    flex-direction: column;     /* vertical stacking */
+    align-items: center;        /* horizontal centering */
+    justify-content: center;    /* vertical centering */
+    gap: 6px;                   /* spacing between inputs */
+}
+.cell-center {
+    display: flex;
+    flex-direction: row;     /* vertical stacking */
+    align-items: center;        /* horizontal centering */
+    justify-content: center;    /* vertical centering */
+    gap: 6px;                   /* spacing between inputs */
+}
+.file-upload {
+    display: none; /* hide the real input */
+  }
+
+.file-label {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: #00c090;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+  justify-content: center;
+  text-align: center;
+}
+
+.file-label.selected {
+    background-color: #2561a8;   /* new color */
+}
+.file-label:hover {
+  background-color: #2561a8;
+}
+
+.file-name {
+  margin-left: 10px;
+  font-style: italic;
+}
+
+.table-container {
+    overflow-x: auto;
+    border-radius: 10px;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+    background: #fff;
+}
+
+
+/* === Base styled table === */
+.styled-table {
+width: 100%;
+border-collapse: collapse;
+font-size: 0.95rem;
+}
+
+/* Header row */
+.styled-table thead th {
+background: #2193b0;
+color: #fff;
+text-align: center;
+cursor: pointer;
+user-select: none;
+position: relative;
+transition: background-color 0.2s ease;
+}
+
+/* ✅ Keep blue header steady — no hover effect */
+.styled-table thead th:hover {
+background: #2193b0 !important;
+}
+
+/* Table body */
+.styled-table th,
+.styled-table td {
+padding: 0.8rem 1rem;
+border-bottom: 1px solid #ddd;
+}
+
+/* Row hover for body only */
+.styled-table tbody tr:hover {
+background: #b4c8d5;
+}
+
+/* === Sortable header enhancements === */
+.styled-table th::after {
+content: "";
+margin-left: 5px;
+font-size: 0.8em;
+color: #fff; /* visible on blue background */
+}
+
+/* Show arrow only on the currently sorted column */
+.styled-table th[data-sorted="asc"]::after {
+content: "▲";
+color: #fff;
+}
+
+.styled-table th[data-sorted="desc"]::after {
+content: "▼";
+color: #fff;
+}
+    
+.input-field {
+    width: 60%;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+/* Unified button styles */
+.action-button {
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    min-width: 100px;
+    transition: background 0.3s ease, transform 0.1s ease;
+}
+
+.action-button:hover {
+    transform: translateY(-1px);
+}
+.apply-button { background-color: #00c090;}
+
+.update-button { background: #2193b0; }
+.update-button:hover { background: #19788f; }
+
+.delete-button { background-color: #d9534f; }
+.delete-button:hover { background-color: #b52b27; }
+
+.add-to-cart { background-color: #5cb85c; }
+.add-to-cart:hover { background-color: #449d44; }
+
+.actions {
+    white-space: nowrap;
+    align-items: center;
+    display: flex;
+    gap: 8px;
+}
+
+.add-form {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.small-input {
+    flex: 1;
+    min-width: 120px;
+}
+
+.smaller-input {
+    flex: 1;
+    max-width: 110px;
+}
+.smallest-input {
+    flex: 1;
+    max-width: 50px;
+}
+
+
+.add-item-form-select {
+    width: 100%;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+.add-item-form-select option {
+    background-color: #fff;
+    color: #333;
+}
+.add-item-form-select option:hover {
+    background-color: #b4c8d5;
+    color: #000;
+}
+</style>
+</html>
