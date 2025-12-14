@@ -9,10 +9,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of your app
-COPY app ./app
+COPY backend ./backend
 
 # Expose port
 EXPOSE 8080
 
 # Run the app using Gunicorn + Uvicorn workers (recommended for production)
-CMD exec uvicorn app.main:app --host 0.0.0.0 --port 8080
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8080"]
