@@ -1,5 +1,6 @@
 fridge-manager/
   backend/
+    __init__.py
     crud.py
     dependencies.py
     main.py
