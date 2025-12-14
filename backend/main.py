@@ -2,7 +2,7 @@ from . import crud
 from . dependencies import get_current_user, require_admin
 from fastapi import File, UploadFile
 from datetime import datetime, timezone, timedelta
-
+import os
 from fastapi import FastAPI, Request, Query, Depends, Form, HTTPException, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -11,10 +11,15 @@ from fastapi.responses import JSONResponse
 from urllib.parse import urlencode
 from fastapi.responses import FileResponse
 from pathlib import Path
+import uvicorn
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_DIR = BASE_DIR / "frontend" / "static"
 TEMPLATES_DIR = BASE_DIR / "frontend" / "templates"
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=port)
 
 app = FastAPI()
 app.mount('/static', StaticFiles(directory=STATIC_DIR), name='static')
