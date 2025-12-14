@@ -1,5 +1,5 @@
-from . import crud
-from . dependencies import get_current_user, require_admin
+import crud
+from dependencies import get_current_user, require_admin
 from fastapi import File, UploadFile
 from datetime import datetime, timezone, timedelta
 import os

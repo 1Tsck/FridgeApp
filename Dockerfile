@@ -2,7 +2,10 @@
 FROM python:3.11-slim
 
 # Set working directory
-WORKDIR /app
+WORKDIR /app/backend
+
+# Add this before running python
+ENV PYTHONPATH=/app/backend
 
 # Copy requirements and install dependencies
 COPY requirements.txt .
@@ -16,4 +19,4 @@ COPY frontend ./frontend
 EXPOSE 8080
 
 # Run the app using Gunicorn + Uvicorn workers (recommended for production)
-CMD ["python", "backend/main.py"]
+CMD ["python", "main.py"]
