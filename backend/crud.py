@@ -236,7 +236,7 @@ def log_change(doc_ref: any, quantity: float, unit: str, user: str, type_name: s
         old_value += "/"+ str(old_quantity)
         new_value += "/"+ str(quantity)
         changed_values +="/quantity"
-    if photo_url != None:
+    if photo_url:
         changed_values +="/photo"
     # save log to db
     log = db.collection(LOG).document()
