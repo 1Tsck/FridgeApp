@@ -12,7 +12,7 @@ from urllib.parse import urlencode
 from fastapi.responses import FileResponse
 
 app = FastAPI()
-app.mount('/static', StaticFiles(directory='app/static'), name='static')
+app.mount('/static', StaticFiles(directory='frontend/static'), name='static')
 templates = Jinja2Templates(directory='app/templates')
 templates.env.globals["get_user"] = lambda request: getattr(request.state, "user", None)
 
