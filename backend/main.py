@@ -10,10 +10,15 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse
 from urllib.parse import urlencode
 from fastapi.responses import FileResponse
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+STATIC_DIR = BASE_DIR / "frontend" / "static"
+TEMPLATES_DIR = BASE_DIR / "frontend" / "templates"
 
 app = FastAPI()
-app.mount('/static', StaticFiles(directory='frontend/static'), name='static')
-templates = Jinja2Templates(directory='app/templates')
+app.mount('/static', StaticFiles(directory=STATIC_DIR), name='static')
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 templates.env.globals["get_user"] = lambda request: getattr(request.state, "user", None)
 
 @app.get("/favicon.ico")
