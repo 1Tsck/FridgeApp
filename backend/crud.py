@@ -172,6 +172,7 @@ def update_fridge_item(item_id: str, quantity: float, unit: str, user: str, type
     if not photo or isinstance(photo, str) or photo.filename == "":
         photo_url = None
         doc_ref.set({"quantity": quantity, "unit": unit, "expiry_date": expiry}, merge=True)
+        log_change(doc_ref, quantity, unit, user, type_name, old_quantity, old_unit, photo_url)
     else:
         # if there is a new photo given and an old one exists, delete the old one from the storage and upload a new one
         if old_photo:
@@ -180,8 +181,7 @@ def update_fridge_item(item_id: str, quantity: float, unit: str, user: str, type
                 return "Failed to delete old photo"
         photo_url, blob_name = upload_photo(photo)
         doc_ref.set({"quantity": quantity, "unit": unit, "photo_url": photo_url, "blob_name": blob_name, "expiry_date": expiry}, merge=True)
-
-    log_change(doc_ref, quantity, unit, user, type_name, old_quantity, old_unit, photo_url)
+        log_change(doc_ref, quantity, unit, user, type_name, old_quantity, old_unit, photo_url)
 
 def update_cart_item(cart_id: str, quantity: float, unit: str, user: str):
     doc_ref = db.collection(CART).document(cart_id)
