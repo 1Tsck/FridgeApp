@@ -16,4 +16,4 @@ COPY frontend ./frontend
 EXPOSE 8080
 
 # Run the app using Gunicorn + Uvicorn workers (recommended for production)
-CMD uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"]
