@@ -1,4 +1,4 @@
-from app.dependencies import db
+from backend.dependencies import db
 from google.cloud import firestore
 from collections import defaultdict
 from firebase_admin import storage
