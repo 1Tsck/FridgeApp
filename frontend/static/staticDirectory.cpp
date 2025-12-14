@@ -1,5 +1,18 @@
 fridge-manager/
-    app/
-      main.py
-      static/
-          favicon.ico
+  backend/
+    crud.py
+    dependencies.py
+    main.py
+  frontend/
+    static/
+      favicon.ico
+      staticDirectory.cpp
+    templates/
+      admin.html
+      base.html
+      cart.html
+      fridge.html
+      login.html
+      stats.html
+  requirements.txt
+  Dockerfile
