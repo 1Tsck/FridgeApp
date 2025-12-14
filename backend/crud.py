@@ -238,6 +238,7 @@ def log_change(doc_ref: any, quantity: float, unit: str, user: str, type_name: s
         changed_values +="/quantity"
     if photo_url:
         changed_values +="/photo"
+        new_value += "/photo"
     # save log to db
     log = db.collection(LOG).document()
     log.set({"op_type":"modify","old_value": old_value, "new_value": new_value, "changed_value": changed_values, "item":type_name, "time":firestore.SERVER_TIMESTAMP, "user":user})
