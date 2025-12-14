@@ -12,7 +12,7 @@ if not firebase_admin._apps:
     else:
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         cred = credentials.Certificate(os.path.join(BASE_DIR, "app/sec/fridgeapp-5c204-firebase-adminsdk-fbsvc-d1394347c8.json"))
-    firebase_admin.initialize_app(cred, {"storageBucket": "fridgeapp-5c204.appspot.com"})
+    firebase_admin.initialize_app(cred, {"storageBucket": "fridgeapp-5c204.firebasestorage.app"})
 db = firestore.client()
 
 # users check
