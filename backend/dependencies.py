@@ -6,13 +6,12 @@ import json
 
 # firestore init
 if not firebase_admin._apps:
-    cred = credentials.Certificate({
-      "type": "service_account",
-      "project_id": os.environ["FIREBASE_PROJECT_ID"],
-      "private_key": os.environ["FIREBASE_PRIVATE_KEY"].replace("\\n", "\n"),
-      "client_email": os.environ["FIREBASE_CLIENT_EMAIL"],
-      "token_uri": "https://oauth2.googleapis.com/token",
-    })
+    if "FIREBASE_CREDENTIALS" in os.environ:
+        cred_dict = json.loads(os.environ["FIREBASE_CREDENTIALS"])
+        cred = credentials.Certificate(cred_dict)
+    else:
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        cred = credentials.Certificate(os.path.join(BASE_DIR, "app/sec/fridgeapp-5c204-firebase-adminsdk-fbsvc-d1394347c8.json"))
     firebase_admin.initialize_app(cred, {"storageBucket": "fridgeapp-5c204.appspot.com"})
 db = firestore.client()
 
