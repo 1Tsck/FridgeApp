@@ -2,7 +2,8 @@ from . import crud
 from .dependencies import get_current_user, require_admin
 from fastapi import File, UploadFile
 from datetime import datetime, timezone, timedelta
-
+import os
+import uvicorn
 from fastapi import FastAPI, Request, Query, Depends, Form, HTTPException, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -16,6 +17,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_DIR = BASE_DIR / "frontend" / "static"
 TEMPLATES_DIR = BASE_DIR / "frontend" / "templates"
 
+port = int(os.environ.get("PORT", 8080))  # Railway sets PORT automatically
+
+if __name__ == "__main__":
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=port)
+
 app = FastAPI()
 app.mount('/static', StaticFiles(directory=STATIC_DIR), name='static')
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
@@ -23,7 +29,7 @@ templates.env.globals["get_user"] = lambda request: getattr(request.state, "user
 
 @app.get("/favicon.ico")
 async def favicon():
-    return FileResponse("/static/favicon.ico")
+    return FileResponse(STATIC_DIR / "favicon.ico")
 
 @app.get('/admin', response_class=HTMLResponse)
 async def admin_page(request: Request, filter: str = Query("", alias="filter"), msg: str = Query("", alias="msg"), user=Depends(require_admin)):
