@@ -25,11 +25,11 @@
                     <td><input name="quantity" value="{{ c.quantity }}" class="input-field"></td>
                     <td><select name="unit" value="{{ c.unit }}" class="input-field">
                                 <option value="">-- Select the unit --</option>
-                                <option value="Pieces" {% if item.unit == "Pieces" %} selected {% endif %}>Pieces</option>
-                                <option value="Kilograms" {% if item.unit == "Kilograms" %} selected {% endif %}>Kilograms</option>
-                                <option value="Grams" {% if item.unit == "Grams" %} selected {% endif %}>Grams</option>
-                                <option value="Litres" {% if item.unit == "Litres" %} selected {% endif %}>Litres</option>
-                                <option value="Mililitres" {% if item.unit == "Mililitres" %} selected {% endif %}>Mililitres</option>
+                                <option value="Pieces" {% if c.unit == "Pieces" %} selected {% endif %}>Pieces</option>
+                                <option value="Kilograms" {% if c.unit == "Kilograms" %} selected {% endif %}>Kilograms</option>
+                                <option value="Grams" {% if c.unit == "Grams" %} selected {% endif %}>Grams</option>
+                                <option value="Litres" {% if c.unit == "Litres" %} selected {% endif %}>Litres</option>
+                                <option value="Mililitres" {% if c.unit == "Mililitres" %} selected {% endif %}>Mililitres</option>
                         </select>
                     </td>
                     <td class="actions">
