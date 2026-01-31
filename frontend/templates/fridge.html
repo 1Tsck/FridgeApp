@@ -48,11 +48,11 @@
           <input type="number" name="quantity" value="{{ item.quantity }}" class="input-field smallest-input" style="width:70px;">
           <select name="unit" value="{{ item.unit }}" class="input-field" style="width:70px;">
                 <option value="">-- Select the unit --</option>
-                <option value="Pieces" {% if item.unit = "Pieces" %} selected {% endif %}>Pieces</option>
-                <option value="Kilograms" {% if unit = "Kilograms" %}selected{% endif %}>Kilograms</option>
-                <option value="Grams" {% if unit = "Grams" %}selected{% endif %}>Grams</option>
-                <option value="Litres" {% if unit = "Litres" %}selected{% endif %}>Litres</option>
-                <option value="Mililitres" {% if unit = "Mililitres" %}selected{% endif %}>Mililitres</option>
+                <option value="Pieces" {% if item.unit == "Pieces" %} selected {% endif %}>Pieces</option>
+                <option value="Kilograms" {% if unit == "Kilograms" %}selected{% endif %}>Kilograms</option>
+                <option value="Grams" {% if unit == "Grams" %}selected{% endif %}>Grams</option>
+                <option value="Litres" {% if unit == "Litres" %}selected{% endif %}>Litres</option>
+                <option value="Mililitres" {% if unit == "Mililitres" %}selected{% endif %}>Mililitres</option>
           </select>
           <input type="date" name="expiry_date" class="input-field small-input" value="{{ item.expiry_date }}">
   
