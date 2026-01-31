@@ -46,7 +46,14 @@
           <div class="cell-center">
           <!-- inline fields -->
           <input type="number" name="quantity" value="{{ item.quantity }}" class="input-field smallest-input" style="width:70px;">
-          <input name="unit" value="{{ item.unit }}" class="input-field" style="width:70px;">
+          <select name="unit" value="{{ item.unit }}" class="input-field" style="width:70px;">
+                <option value="">-- Select the unit --</option>
+                <option value="Pieces">Pieces</option>
+                <option value="Kilograms">Kilograms</option>
+                <option value="Grams">Grams</option>
+                <option value="Litres">Litres</option>
+                <option value="Mililitres">Mililitres</option>
+          </select>
           <input type="date" name="expiry_date" class="input-field small-input" value="{{ item.expiry_date }}">
   
           <input type="file" name="photo" id="photo-{{ item.id }}" class="file-upload">
@@ -91,7 +98,7 @@
     <input type="number" id="add_item_quantity" name="add_item_quantity" placeholder="Quantity" required class="input-field smaller-input">
 
     <select type="text" id="add_item_unit" name="add_item_unit" placeholder="Unit" required class="input-field small-input">
-        <option value="">-- Select item type --</option>
+        <option value="">-- Select the unit --</option>
         <option value="Pieces">Pieces</option>
         <option value="Kilograms">Kilograms</option>
         <option value="Grams">Grams</option>
