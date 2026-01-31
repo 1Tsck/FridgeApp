@@ -120,7 +120,14 @@ function openUpdateModal(itemTypeId, itemTypeName) {
             <input type="hidden" id="swal-item-type-id" value="${itemTypeId}">
             <div style="display: flex; flex-direction: row; gap: 15px;">
                 <input type="number" id="swal-quantity" class="input-field small-input" placeholder="Enter quantity" required>
-                <input type="text" id="swal-unit" class="input-field small-input" placeholder="Enter unit" required>
+                <select type="text" id="swal-unit" class="input-field small-input" placeholder="Select unit" required>
+                    <option value="">-- Select the unit --</option>
+                    <option value="Pieces">Pieces</option>
+                    <option value="Kilograms">Kilograms</option>
+                    <option value="Grams">Grams</option>
+                    <option value="Litres">Litres</option>
+                    <option value="Mililitres">Mililitres</option>
+                </select>
             </div>
         `,
         showCancelButton: true,
